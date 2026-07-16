@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>SandScape — Liquid Sand Art</title>
+<meta name="description" content="A meditative moving sand-art simulation. Tilt to pour layered colored sand through viscous liquid and watch it settle into new landscapes. Authentic Exotic Sands + team-color palettes.">
+<meta name="theme-color" content="#12122a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta property="og:title" content="SandScape — Liquid Sand Art">
+<meta property="og:description" content="Tilt your phone and watch colored sand slowly cascade and settle into new landscapes. Authentic Exotic Sands palettes + every major sports team's colors.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SandScape — Liquid Sand Art">
+<meta name="twitter:description" content="Meditative moving sand art. Tilt to pour; authentic Exotic Sands + team-color palettes.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="stage">
+  <div id="frameOuter">
+    <div id="glassWrap">
+      <canvas id="sim"></canvas>
+      <div class="gloss g1"></div>
+      <div class="gloss g2"></div>
+      <div class="gloss g3"></div>
+      <div id="gravInd"><div id="gravDot"></div></div>
+    </div>
+  </div>
+  <div id="pedestal"></div>
+</div>
+
+<button id="tiltBtn">Enable tilt</button>
+<div id="hint">tilt or drag to pour &nbsp;·&nbsp; tap to disturb &nbsp;·&nbsp; hold for options &nbsp;·&nbsp; shake to flip</div>
+<div id="toast"></div>
+
+<div id="drawer">
+  <div class="grip"></div>
+  <h2>Sand palette</h2>
+  <div class="tabs" id="tabList"></div>
+  <div class="palettes grid" id="palList"></div>
+  <h2 style="margin-top:16px">Tilt control</h2>
+  <div class="seg">
+    <button id="modeDevice">Device motion</button>
+    <button id="modeFinger" class="on">Finger drag</button>
+  </div>
+  <h2 style="margin-top:16px">Glass shape</h2>
+  <div class="seg">
+    <button id="shapeCircle" class="on">Circle</button>
+    <button id="shapeSquare">Square</button>
+  </div>
+  <div class="speed">
+    <label for="speedRange">Flow speed</label>
+    <input type="range" id="speedRange" min="0.5" max="3" step="0.25" value="1">
+    <output id="speedVal">1×</output>
+  </div>
+  <div class="actions">
+    <button id="btnFlip">Flip frame</button>
+    <button id="btnReset">Reset sand</button>
+    <button id="btnCapture">Save PNG</button>
+    <button id="btnTest">Self-tests</button>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

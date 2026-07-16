@@ -1,0 +1,17 @@
+{
+  "name": "SandScape — Liquid Sand Art",
+  "short_name": "SandScape",
+  "description": "A meditative moving sand-art simulation. Tilt to pour layered colored sand through viscous liquid and watch it settle into new landscapes.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0b09",
+  "theme_color": "#12122a",
+  "categories": ["entertainment", "lifestyle", "art"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

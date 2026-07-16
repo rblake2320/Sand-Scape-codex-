@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SandScape</string>
+    <string name="title_activity_main">SandScape</string>
+    <string name="package_name">com.rblake.sandscape</string>
+    <string name="custom_url_scheme">com.rblake.sandscape</string>
+</resources>
