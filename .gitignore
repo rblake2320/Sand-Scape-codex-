@@ -9,7 +9,3 @@ android/local.properties
 android/.gradle/
 android/app/build/
 ios/App/DerivedData/
-
-# local zip-extraction scratch (delete freely)
-_full/
-_pwa/
