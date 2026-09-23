@@ -1,5 +1,5 @@
 
-SandScape self-tests @ 256×256: 11/11 passed (2339ms)
+SandScape self-tests @ 256×256: 11/11 passed (2247ms)
   PASS  1 mass conservation (400 steps, moving gravity) — 22540 → 22540
   PASS  2 wall integrity after churn — 0 corrupted cells
   PASS  3 no sand escapes the frame — 0 escapees
@@ -12,7 +12,7 @@ SandScape self-tests @ 256×256: 11/11 passed (2339ms)
   PASS  10 square frame: churn keeps mass + walls — 28612→28612, wallErr=0, esc=0
   PASS  11 renderer: full coverage, opaque, walls framed — 65536 px verified
 
-SandScape self-tests @ 448×448: 11/11 passed (7088ms)
+SandScape self-tests @ 448×448: 11/11 passed (7911ms)
   PASS  1 mass conservation (400 steps, moving gravity) — 70540 → 70540
   PASS  2 wall integrity after churn — 0 corrupted cells
   PASS  3 no sand escapes the frame — 0 escapees
