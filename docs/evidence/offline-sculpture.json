@@ -1,0 +1,15 @@
+{
+  "status": "Worked",
+  "scenario": "New network-first service worker: complete 3D assets load offline; palette changed",
+  "state": {
+    "use3D": true,
+    "orbitMode": false,
+    "ready": true,
+    "points": 70540,
+    "bubbles": 0,
+    "shape": "circle",
+    "azimuth": 0.26,
+    "calls": 38,
+    "triangles": 40348
+  }
+}

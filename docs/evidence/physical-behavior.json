@@ -1,0 +1,70 @@
+{
+  "scenario": "Liquid sand-picture behavioral acceptance",
+  "status": "Worked",
+  "measurements": [
+    {
+      "step": 150,
+      "upper_fraction": 0.9794143744454303,
+      "active_crossing_columns": 93,
+      "mass": 22540
+    },
+    {
+      "step": 1500,
+      "upper_fraction": 0.06388642413487133,
+      "active_crossing_columns": 76,
+      "mass": 22540
+    },
+    {
+      "step": 6000,
+      "upper_fraction": 0.0007985803016858918,
+      "active_crossing_columns": 0,
+      "mass": 22540
+    },
+    {
+      "step": 12000,
+      "upper_fraction": 0.000354924578527063,
+      "active_crossing_columns": 0,
+      "mass": 22540
+    }
+  ],
+  "air_resistance": [
+    {
+      "air": 0.5,
+      "upper_fraction": 0.19480762047067612,
+      "active_crossing_columns": 47,
+      "mass": 5354
+    },
+    {
+      "air": 2,
+      "upper_fraction": 0.3109824430332462,
+      "active_crossing_columns": 69,
+      "mass": 5354
+    }
+  ],
+  "shake": "Redistributes release gaps without flipping or moving sand",
+  "refresh_rate": [
+    {
+      "fps": 30,
+      "ticks": 600
+    },
+    {
+      "fps": 60,
+      "ticks": 600
+    },
+    {
+      "fps": 144,
+      "ticks": 600
+    }
+  ],
+  "density_settling": [
+    {
+      "type": 1,
+      "average_fall_cells": 30.5
+    },
+    {
+      "type": 5,
+      "average_fall_cells": 21.125
+    }
+  ],
+  "model": "Cellular granular simulation with a persistent air-resistance field; not a fluid/air CFD solver"
+}

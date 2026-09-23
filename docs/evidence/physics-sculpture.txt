@@ -1,0 +1,26 @@
+
+SandScape self-tests @ 256×256: 11/11 passed (2247ms)
+  PASS  1 mass conservation (400 steps, moving gravity) — 22540 → 22540
+  PASS  2 wall integrity after churn — 0 corrupted cells
+  PASS  3 no sand escapes the frame — 0 escapees
+  PASS  4 density stratification under settle — heavy ȳ=203.4 vs light ȳ=166.7
+  PASS  5 flip preserves mass + walls — 22540→22540, wallErr=0
+  PASS  6 viscous cling: mass hangs after flip — 99% still suspended @150 steps
+  PASS  7 disturb storm: 200 taps, invariants hold — 22540→22540, wallErr=0
+  PASS  8 determinism under fixed seed — hash 114365195 vs 114365195
+  PASS  9 palette generator: every palette valid — 193 palettes checked
+  PASS  10 square frame: churn keeps mass + walls — 28612→28612, wallErr=0, esc=0
+  PASS  11 renderer: full coverage, opaque, walls framed — 65536 px verified
+
+SandScape self-tests @ 448×448: 11/11 passed (7911ms)
+  PASS  1 mass conservation (400 steps, moving gravity) — 70540 → 70540
+  PASS  2 wall integrity after churn — 0 corrupted cells
+  PASS  3 no sand escapes the frame — 0 escapees
+  PASS  4 density stratification under settle — heavy ȳ=344.5 vs light ȳ=305.1
+  PASS  5 flip preserves mass + walls — 70540→70540, wallErr=0
+  PASS  6 viscous cling: mass hangs after flip — 99% still suspended @150 steps
+  PASS  7 disturb storm: 200 taps, invariants hold — 70540→70540, wallErr=0
+  PASS  8 determinism under fixed seed — hash 1335139866 vs 1335139866
+  PASS  9 palette generator: every palette valid — 193 palettes checked
+  PASS  10 square frame: churn keeps mass + walls — 89656→89656, wallErr=0, esc=0
+  PASS  11 renderer: full coverage, opaque, walls framed — 200704 px verified

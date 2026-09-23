@@ -1,0 +1,21 @@
+{
+  "tool": "5.1.2",
+  "author": "Original procedural model authored for SandScape",
+  "license": "MIT (project license)",
+  "front": "Blender -Y, glTF +Z",
+  "units": "meters; sculpture height 2.627",
+  "exports": [
+    {
+      "file": "sculpture-circle.glb",
+      "bytes": 414404,
+      "sha256": "4a1b4b5a973bbac661d54bd383c2d0dca828aaaea503b4ecdf13ea6d90b62e5a",
+      "objects": 10
+    },
+    {
+      "file": "sculpture-square.glb",
+      "bytes": 414404,
+      "sha256": "b3e838e607b8d93a7e2e201c21c0dbf4dcae5119b6e0e71978d86f2482a13985",
+      "objects": 10
+    }
+  ]
+}

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>SandScape — Liquid Sand Art</title>
@@ -20,7 +20,12 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
+<header class="masthead"><a class="wordmark" href="./">SandScape<span>THE MOVING SAND STUDIO</span></a><div class="edition">LOCAL EDITION <span class="live-dot"></span></div></header>
+<main class="studio">
+<section class="exhibit" aria-label="Interactive sand art">
+<div class="exhibit-heading"><span class="eyebrow">A LITTLE STILLNESS. ALWAYS IN MOTION.</span><h1>Let the world<br> <em>settle.</em></h1></div>
+<div class="view-bar"><span id="visualStatus">Preparing the sculpture…</span><div><button id="orbitMode" aria-pressed="false">Orbit view</button><button id="classicMode" aria-pressed="false">2D view</button></div></div>
+<div id="sculptureWrap" hidden><canvas id="sculpture" aria-label="Live three-dimensional moving sand picture"></canvas></div>
 <div id="stage">
   <div id="frameOuter">
     <div id="glassWrap">
@@ -33,12 +38,36 @@
   </div>
   <div id="pedestal"></div>
 </div>
-
+<div class="art-caption"><span id="sceneName">Ocean Blue</span><span>Drag to tilt · tap to stir</span></div>
+<div class="transport"><button id="quickFlip" aria-label="Flip frame">↻ <span>Flip</span></button><button id="pauseBtn" aria-pressed="false">Ⅱ <span>Pause</span></button><button id="quickCapture">↓ <span>Save art</span></button><button id="recordBtn">○ <span>Record clip</span></button></div>
+</section>
+<aside class="studio-panel" aria-label="Scene controls">
+<div class="panel-title"><span class="eyebrow">YOUR SMALL ESCAPE</span><h2>Make it yours.</h2><p>A few words. A new atmosphere.</p></div>
+<form id="directorForm">
+<label for="scenePrompt">Describe your scene <span>ENGLISH</span></label>
+<textarea id="scenePrompt" maxlength="240" rows="3" placeholder="A peaceful ocean in deep blue, with slow flowing sand…">A warm orange desert sunset, slow and peaceful</textarea>
+<button class="primary" id="suggestBtn" type="submit">Find my atmosphere <span>↗</span></button>
+</form>
+<div class="model-line"><span class="live-dot"></span><span id="modelStatus">Connecting to local Laya…</span><button id="retryModel" aria-label="Reconnect to Laya">↻</button></div>
+<div id="suggestion" hidden><p id="suggestionText" role="status"></p><p class="fine-print">A model suggestion. Adjust it to your taste.</p><button id="applySuggestion" class="primary">Apply atmosphere</button></div>
+<p id="directorError" role="alert" hidden></p>
+<div class="section-heading"><h3>Curated atmospheres</h3><span>01 — 05</span></div>
+<div id="quickPalettes" class="atmospheres"></div>
+<button id="allPalettes" class="text-button">Explore all 193 palettes <span>→</span></button>
+<div class="section-heading"><h3>Set the pace</h3><output id="studioSpeedVal">1×</output></div>
+<label class="sr-only" for="studioSpeed">Flow speed</label><input id="studioSpeed" type="range" min="0.5" max="3" step="0.25" value="1">
+<div class="range-labels"><span>UNHURRIED</span><span>ENERGETIC</span></div>
+<div class="section-heading"><h3>Frame finish</h3><span>BRUSHED METAL</span></div><div class="finish-options"><button data-finish="bronze" aria-pressed="true">Champagne</button><button data-finish="graphite" aria-pressed="false">Graphite</button><button data-finish="silver" aria-pressed="false">Silver</button></div>
+<div class="section-heading"><h3>Air-bubble barrier</h3><button class="text-button" id="shakeAir">Redistribute bubbles ↻</button></div><label class="sr-only" for="airRange">Air-bubble resistance</label><input id="airRange" type="range" min="0.5" max="2" step="0.25" value="1"><div class="range-labels"><span>OPEN FLOW</span><span>MORE RESISTANCE</span></div>
+<div class="panel-footer"><span>Real sand physics.<br>A different landscape every time.</span><button id="quickReset" class="text-button">Start again ↻</button></div>
+</aside>
+</main>
+<footer class="studio-footer"><span>193 PALETTES · INFINITE LANDSCAPES</span><span>Made for a moment of pause.</span></footer>
 <button id="tiltBtn">Enable tilt</button>
-<div id="hint">tilt or drag to pour &nbsp;·&nbsp; tap to disturb &nbsp;·&nbsp; hold for options &nbsp;·&nbsp; shake to flip</div>
-<div id="toast"></div>
-
-<div id="drawer">
+<div id="hint">tilt or drag to pour &nbsp;·&nbsp; tap to disturb &nbsp;·&nbsp; hold for options &nbsp;·&nbsp; shake to redistribute bubbles</div>
+<div id="toast" role="status"></div>
+<div id="drawer" role="dialog" aria-label="All palettes and settings" inert>
+  <button id="closeDrawer" aria-label="Close settings">×</button>
   <div class="grip"></div>
   <h2>Sand palette</h2>
   <div class="tabs" id="tabList"></div>
@@ -65,7 +94,7 @@
     <button id="btnTest">Self-tests</button>
   </div>
 </div>
-
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js"}}</script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>

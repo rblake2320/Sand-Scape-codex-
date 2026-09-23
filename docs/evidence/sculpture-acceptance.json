@@ -1,0 +1,29 @@
+{
+  "status": "Worked",
+  "initial": {
+    "use3D": true,
+    "orbitMode": false,
+    "ready": true,
+    "points": 70540,
+    "bubbles": 0,
+    "shape": "circle",
+    "azimuth": 0.26,
+    "calls": 38,
+    "triangles": 40348
+  },
+  "after_flip": {
+    "use3D": true,
+    "orbitMode": true,
+    "ready": true,
+    "points": 70540,
+    "bubbles": 2000,
+    "shape": "circle",
+    "azimuth": 0.6599999999980816,
+    "calls": 38,
+    "triangles": 40348
+  },
+  "orbit": "camera changed; gravity and paused sand unchanged",
+  "shape": "round and square loaded",
+  "finishes": "silver and champagne rendered",
+  "errors": []
+}

@@ -41,6 +41,8 @@ export class SandEngine {
     this.G = { x: 0, y: 1, tx: 0, ty: 1 };      // current + target gravity
     this.framePass = 0;
     this.reseed(seed ?? (Math.random() * 2 ** 32) >>> 0);
+    this.flowSeed = this._seed;
+    this.airResistance = 1;
     this.initSand();
   }
 
@@ -125,7 +127,23 @@ export class SandEngine {
      a resting grain RELEASES, so sand seeps through in uneven streams and holds
      in others (the visible effect of the real air-bubble barrier), sculpting
      intricate fronts instead of a uniform sheet. Free-fall speed is untouched. */
-  permAt(x, y) { return 0.40 + 0.60 * ((hash2(x >> 3, y >> 3, 0x5A17) & 255) * 0.00392157); }
+  permAt(x, y) {
+    // Persistent gaps in an air curtain: releases are concentrated into streams,
+    // rather than fresh random holes across the entire width on every step.
+    const across = Math.abs(this.G.y) >= Math.abs(this.G.x) ? x : y;
+    const band = Math.floor(across / Math.max(3, Math.round(this.N * .025)));
+    const gap = (hash2(band, 0, this.flowSeed) & 255) > 190;
+    return (gap ? 1 : .025) / this.airResistance;
+  }
+
+  setAirResistance(value) {
+    if (!Number.isFinite(value) || value < .5 || value > 2) throw new RangeError('Air resistance must be between 0.5 and 2');
+    this.airResistance = value;
+  }
+
+  redistributeAir() {
+    this.flowSeed = (this.rnd() * 2 ** 32) >>> 0;
+  }
 
   /* ---------- physics step ---------- */
   step() {
@@ -166,7 +184,7 @@ export class SandEngine {
     const b = mat[bi];
 
     if (b === EMPTY) {
-      const p = fall[i] ? P_FALL : (held ? P_LEAK : P_LOOSE) * this.permAt(x, y);
+      const p = fall[i] ? P_FALL * (.65 + .35 * DEN[t] / 5) : (held ? P_LEAK * this.permAt(x, y) : P_LOOSE);
       if (this.rnd() < p) { this.moveGrain(i, bi); fall[bi] = 1; }
       return;                                 // waiting; keep fall state
     }
@@ -189,7 +207,7 @@ export class SandEngine {
     const b = mat[bi];
 
     if (b === EMPTY) {
-      const p = fall[i] ? P_FALL : (held ? P_LEAK : P_LOOSE) * this.permAt(x, y);
+      const p = fall[i] ? P_FALL * (.65 + .35 * DEN[t] / 5) : (held ? P_LEAK * this.permAt(x, y) : P_LOOSE);
       if (this.rnd() < p) { this.moveGrain(i, bi); fall[bi] = 1; }
       return;
     }
@@ -262,12 +280,15 @@ export class SandEngine {
   snapshot() {
     const G = this.G;
     return { m: this.mat.slice(), s: this.shade.slice(), f: this.fall.slice(),
-             gx: G.x, gy: G.y, tx: G.tx, ty: G.ty };
+             gx: G.x, gy: G.y, tx: G.tx, ty: G.ty,
+             flowSeed: this.flowSeed, airResistance: this.airResistance };
   }
 
   restore(sn) {
     this.mat = sn.m; this.shade = sn.s; this.fall = sn.f;
     const G = this.G;
     G.x = sn.gx; G.y = sn.gy; G.tx = sn.tx; G.ty = sn.ty;
+    this.flowSeed = sn.flowSeed ?? this.flowSeed;
+    this.airResistance = sn.airResistance ?? 1;
   }
 }

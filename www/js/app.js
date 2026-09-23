@@ -5,6 +5,7 @@ import { SandEngine } from './engine.js';
 import { SandRenderer } from './render.js';
 import { GROUPS, DIRECT, TEAMS, resolvePalette, paletteName, paletteCount } from './palettes.js';
 import { runSelfTests } from './selftests.js';
+import { SimulationClock } from './sim-clock.js';
 
 /* ---------- persistence (storage can be blocked in private/embedded contexts) ---------- */
 const store = {
@@ -18,6 +19,9 @@ const store = {
 const N = (typeof innerWidth === 'number' && Math.min(innerWidth, innerHeight) >= 700) ? 448 : 256;
 let shape = store.get('sandscape.shape') === 'square' ? 'square' : 'circle';
 const sim = new SandEngine({ size: N, shape });
+let sculpture = null;
+let use3D = false;
+let orbitMode = false;
 const renderer = new SandRenderer(N);
 
 let SPEED = Number(store.get('sandscape.speed')) || 1;
@@ -30,6 +34,7 @@ try {
 } catch { /* ignore */ }
 let viewGroup = sel.group;
 let debugHud = false;
+let paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 /* ---------- canvas ---------- */
 const cv = document.getElementById('sim');
@@ -41,11 +46,13 @@ const px32 = new Uint32Array(img.data.buffer);
 
 let indR = 0;
 function size() {
-  const S = Math.min(innerWidth, innerHeight) * 0.84;
+  const available = document.querySelector('.exhibit').clientWidth;
+  const S = Math.max(180, Math.min(available * 0.86, innerWidth > 800 ? innerHeight * 0.55 : innerWidth * 0.78, 580));
   document.documentElement.style.setProperty('--S', S + 'px');
   indR = S * 0.5 - 14;
   const dpr = Math.min(devicePixelRatio || 1, 2.5);
   cv.width = Math.round(S * dpr); cv.height = Math.round(S * dpr);
+  if (sculpture) { const wrap = document.getElementById('sculptureWrap'); if (wrap.clientWidth) sculpture.resize(wrap.clientWidth, wrap.clientHeight); }
 }
 addEventListener('resize', size);
 
@@ -62,8 +69,13 @@ function toast(msg, ms = 1800) {
 /* ---------- palette ---------- */
 function applyPalette() {
   renderer.setPalette(resolvePalette(sel.group, sel.i));
+  sculpture?.setPalette(resolvePalette(sel.group, sel.i));
   store.set('sandscape.palette', JSON.stringify(sel));
+  document.getElementById('sceneName').textContent = paletteName(sel.group, sel.i);
+  document.querySelectorAll('.atmosphere').forEach((b, i) => b.setAttribute('aria-pressed', String(sel.group === 'Exotic' && sel.i === i)));
 }
+
+function flipFrame() { sim.flipFrame(); sculpture?.flip(); }
 
 /* ---------- sensors ---------- */
 const tiltBtn = document.getElementById('tiltBtn');
@@ -71,7 +83,7 @@ let tiltMode = 'finger';          // 'finger' | 'device'
 let userChoseMode = false;
 let sensorAvailable = false;
 let fingerHintShown = false;
-let lastGChange = 0;
+let lastGChange = -Infinity;
 
 function noteGravityChange(changed) { if (changed) lastGChange = performance.now(); }
 
@@ -110,8 +122,8 @@ function shakeFlip() {
   const now = performance.now();
   if (now - lastFlip < 1600) return;
   lastFlip = now;
-  sim.flipFrame();
-  toast('Flipped');
+  sim.redistributeAir();
+  toast('Air bubbles redistributed');
 }
 function onMotion(e) {
   const a = e.acceleration;
@@ -146,20 +158,33 @@ if (typeof DeviceOrientationEvent !== 'undefined' &&
 
 /* ---------- pointer: tap / drag-tilt / long-press ---------- */
 const drawer = document.getElementById('drawer');
+let drawerReturnFocus;
+function setDrawer(open) {
+  drawer.classList.toggle('open', open);
+  drawer.inert = !open;
+  if (open) { drawerReturnFocus = document.activeElement; document.getElementById('closeDrawer').focus(); }
+  else drawerReturnFocus?.focus();
+}
+
 let pDown = null, pMoved = false, lpTimer = null;
 
-cv.parentElement.addEventListener('pointerdown', e => {
-  pDown = { x: e.clientX, y: e.clientY, t: performance.now() };
+function pointerStart(e) {
+  pDown = { x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, t: performance.now(), sculpt: e.currentTarget.id === 'sculpture' };
+  e.currentTarget.setPointerCapture?.(e.pointerId);
   pMoved = false;
-  lpTimer = setTimeout(() => { if (!pMoved) { drawer.classList.add('open'); pDown = null; } }, 550);
-});
+  lpTimer = setTimeout(() => { if (!pMoved) { setDrawer(true); pDown = null; } }, 550);
+}
+cv.parentElement.addEventListener('pointerdown', pointerStart);
+document.getElementById('sculpture').addEventListener('pointerdown', pointerStart);
+addEventListener('pointercancel', () => { clearTimeout(lpTimer); pDown = null; });
 addEventListener('pointermove', e => {
   if (!pDown) return;
   const dx = e.clientX - pDown.x, dy = e.clientY - pDown.y;
+  if (pDown.sculpt && orbitMode) { pMoved = true; clearTimeout(lpTimer); sculpture.orbit(e.clientX-pDown.lastX, e.clientY-pDown.lastY); pDown.lastX=e.clientX;pDown.lastY=e.clientY;return; }
   if (Math.hypot(dx, dy) > 12) {
     pMoved = true; clearTimeout(lpTimer);
     if (tiltMode === 'finger') {                 // finger steering: drag = gravity
-      const r = cv.getBoundingClientRect();
+      const r = (pDown?.sculpt ? document.getElementById('sculpture') : cv).getBoundingClientRect();
       noteGravityChange(sim.setTargetGravity(
         e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)));
       if (!fingerHintShown) { fingerHintShown = true; toast('Sand pours toward the glowing marker'); }
@@ -169,25 +194,28 @@ addEventListener('pointermove', e => {
 addEventListener('pointerup', e => {
   clearTimeout(lpTimer);
   if (pDown && !pMoved && performance.now() - pDown.t < 400) {
-    const r = cv.getBoundingClientRect();
+    const r = (pDown?.sculpt ? document.getElementById('sculpture') : cv).getBoundingClientRect();
     const gx = Math.round((e.clientX - r.left) / r.width * N);
     const gy = Math.round((e.clientY - r.top) / r.height * N);
-    sim.disturb(gx, gy);
+    const hit = pDown.sculpt ? sculpture.pick((e.clientX-r.left)/r.width*2-1, 1-(e.clientY-r.top)/r.height*2) : {x:gx,y:gy};
+    if (hit && !(pDown.sculpt && orbitMode)) sim.disturb(hit.x, hit.y);
   }
   pDown = null;
 });
 document.addEventListener('pointerdown', e => {
-  if (drawer.classList.contains('open') && !drawer.contains(e.target)) drawer.classList.remove('open');
+  if (drawer.classList.contains('open') && !drawer.contains(e.target)) setDrawer(false);
 }, true);
 
 /* ---------- keyboard (desktop) ---------- */
 addEventListener('keydown', e => {
+  if (e.key === 'Escape') { setDrawer(false); return; }
+  if (e.target.closest('input,textarea,select,[contenteditable="true"]') || e.ctrlKey || e.metaKey || e.altKey) return;
   const map = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
   if (map[e.key]) { e.preventDefault(); noteGravityChange(sim.setTargetGravity(...map[e.key])); return; }
   const k = e.key.toLowerCase();
-  if (k === 'f') { sim.flipFrame(); toast('Flipped'); }
+  if (k === 'f') { flipFrame(); toast('Flipped'); }
   if (k === 'r') { sim.initSand(); toast('Reset'); }
-  if (k === 'p') drawer.classList.toggle('open');
+  if (k === 'p') setDrawer(!drawer.classList.contains('open'));
   if (k === 's') capture();
   if (k === 'd') { debugHud = !debugHud; }
 });
@@ -219,11 +247,11 @@ function buildDrawer() {
   });
 }
 
-document.getElementById('btnFlip').addEventListener('click', () => { sim.flipFrame(); toast('Flipped'); });
+document.getElementById('btnFlip').addEventListener('click', () => { flipFrame(); toast('Flipped'); });
 document.getElementById('btnReset').addEventListener('click', () => { sim.initSand(); toast('Reset'); });
-document.getElementById('btnCapture').addEventListener('click', () => { drawer.classList.remove('open'); capture(); });
+document.getElementById('btnCapture').addEventListener('click', () => { setDrawer(false); capture(); });
 document.getElementById('btnTest').addEventListener('click', () => {
-  drawer.classList.remove('open');
+  setDrawer(false);
   toast('Running self-tests…', 4000);
   setTimeout(() => {
     const { pass, total, results } = runSelfTests(N);
@@ -252,7 +280,8 @@ function updateShapeUI() {
 function setShape(next) {
   if (next === shape) return;
   shape = next;
-  sim.setShape(shape);            // rebuilds walls + re-pours the sand
+  sim.setShape(shape);
+  sculpture?.setShape(shape);            // rebuilds walls + re-pours the sand
   store.set('sandscape.shape', shape);
   updateShapeUI();
   toast(shape === 'square' ? 'Square glass' : 'Circle glass');
@@ -264,6 +293,8 @@ const speedRange = document.getElementById('speedRange');
 const speedVal = document.getElementById('speedVal');
 function updateSpeedUI() {
   speedRange.value = SPEED;
+  document.getElementById('studioSpeed').value = SPEED;
+  document.getElementById('studioSpeedVal').textContent = SPEED + '×';
   speedVal.textContent = (SPEED % 1 === 0 ? SPEED : SPEED.toFixed(2).replace(/0$/, '')) + '×';
 }
 speedRange.addEventListener('input', () => {
@@ -274,6 +305,11 @@ speedRange.addEventListener('input', () => {
 
 /* ---------- capture: framed PNG snapshot ---------- */
 function capture() {
+  if (use3D && sculpture?.ready) {
+    sculpture.render(sim, px32, paused);
+    const a = document.createElement('a'); a.download = `SandScape-sculpture-${Date.now()}.png`;
+    a.href = document.getElementById('sculpture').toDataURL('image/png'); a.click(); toast('Sculpture saved'); return;
+  }
   const out = document.createElement('canvas');
   const S = 1400, pad = 55, ring = 38;
   out.width = S; out.height = S;
@@ -321,21 +357,27 @@ let lastVisible = true;
 document.addEventListener('visibilitychange', () => { lastVisible = !document.hidden; });
 
 let frameMsAvg = 0;
-function loop() {
+const simulationClock = new SimulationClock();
+function loop(now = performance.now()) {
   requestAnimationFrame(loop);
-  if (!lastVisible) return;
+  if (!lastVisible) { simulationClock.advance(now, true, () => {}); return; }
   const t0 = performance.now();
+  simulationClock.advance(now, paused, () => {
   sim.smoothGravity();
   const total = Math.min(sim.stepCap, sim.substeps * SPEED);
   const whole = total | 0;
   for (let s = 0; s < whole; s++) sim.step();
   if (sim.rnd() < total - whole) sim.step();
+  });
   updateIndicator();
+  const renderFrame = renderer.frameNo;
   renderer.render(sim, px32);
+  if (paused) renderer.frameNo = renderFrame;
   octx.putImageData(img, 0, 0);
   ctx.imageSmoothingEnabled = true;
   ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(off, 0, 0, cv.width, cv.height);
+  if (use3D && sculpture?.ready) sculpture.render(sim, px32, paused);
   if (debugHud) {
     frameMsAvg += (performance.now() - t0 - frameMsAvg) * 0.05;
     const s = (devicePixelRatio || 1);
@@ -345,8 +387,113 @@ function loop() {
   }
 }
 
+/* ---------- visible studio controls + optional local scene director ---------- */
+const pauseBtn = document.getElementById('pauseBtn');
+function syncPause() {
+  pauseBtn.innerHTML = paused ? '▷ <span>Resume</span>' : 'Ⅱ <span>Pause</span>';
+  pauseBtn.setAttribute('aria-pressed', String(paused));
+}
+pauseBtn.addEventListener('click', () => { paused = !paused; syncPause(); });
+syncPause();
+document.getElementById('quickFlip').addEventListener('click', () => { flipFrame(); toast('Flipped'); });
+document.getElementById('quickCapture').addEventListener('click', capture);
+document.getElementById('airRange').addEventListener('input', e => { sim.setAirResistance(Number(e.target.value)); });
+document.getElementById('shakeAir').addEventListener('click', () => { sim.redistributeAir(); toast('Air-bubble gaps redistributed'); });
+document.getElementById('quickReset').addEventListener('click', () => { sim.initSand(); toast('A fresh landscape'); });
+document.getElementById('allPalettes').addEventListener('click', () => setDrawer(true));
+document.getElementById('closeDrawer').addEventListener('click', () => setDrawer(false));
+document.getElementById('studioSpeed').addEventListener('input', e => {
+  SPEED = Number(e.target.value); store.set('sandscape.speed', String(SPEED)); updateSpeedUI();
+});
+DIRECT.Exotic.forEach((p, i) => {
+  const b = document.createElement('button'); b.className = 'atmosphere';
+  b.title = p.name; b.setAttribute('aria-label', p.name); b.setAttribute('aria-pressed', 'false');
+  b.style.background = `linear-gradient(155deg, ${p.liquid[0]} 25%, ${p.sand[4]} 26%, ${p.sand[3]} 47%, ${p.sand[1]} 48%, ${p.sand[0]} 80%)`;
+  b.addEventListener('click', () => { sel = { group: 'Exotic', i }; applyPalette(); buildDrawer(); });
+  document.getElementById('quickPalettes').appendChild(b);
+});
+const modelStatus = document.getElementById('modelStatus');
+const suggestBtn = document.getElementById('suggestBtn');
+const suggestion = document.getElementById('suggestion');
+const directorError = document.getElementById('directorError');
+let candidate = null;
+async function checkModel() {
+  if (!window.SANDSCAPE_LOCAL_LAYA) { modelStatus.textContent = 'Manual studio · start local server for Laya'; return; }
+  try {
+    const response = await fetch('/api/health', { signal: AbortSignal.timeout(4000), cache: 'no-store' });
+    if (!response.ok) throw new Error('Unavailable');
+    const data = await response.json();
+    modelStatus.textContent = data.status === 'ready' ? 'Laya · on this computer' : data.status === 'loading' ? 'Laya is warming up · retry shortly' : 'Laya unavailable · manual studio ready';
+  } catch { modelStatus.textContent = 'Manual studio · start local server for Laya'; }
+}
+document.getElementById('retryModel').addEventListener('click', checkModel);
+document.getElementById('directorForm').addEventListener('submit', async e => {
+  e.preventDefault();
+  const prompt = document.getElementById('scenePrompt').value.trim();
+  suggestion.hidden = true; candidate = null; directorError.hidden = true;
+  if (!window.SANDSCAPE_LOCAL_LAYA) { directorError.textContent = 'Start the local Laya server to use scene suggestions. The manual controls are ready.'; directorError.hidden = false; return; }
+  if (prompt.length < 3) { directorError.textContent = 'Describe a scene in at least three characters.'; directorError.hidden = false; return; }
+  suggestBtn.disabled = true; suggestBtn.textContent = 'Finding your atmosphere…';
+  try {
+    const response = await fetch('/api/suggest', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prompt }), signal: AbortSignal.timeout(45000) });
+    if (!response.headers.get('content-type')?.includes('application/json')) throw new Error('Start the local Laya server to use scene suggestions. The manual controls are ready.');
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || 'Laya could not suggest a scene.');
+    const c = data.settings;
+    if (data.provider !== 'laya' || c?.group !== 'Exotic' || !Number.isInteger(c.i) || c.i < 0 || c.i >= DIRECT.Exotic.length || ![0.5, 1, 2].includes(c.speed)) throw new Error('Laya returned invalid settings. Please choose a palette manually.');
+    candidate = c;
+    document.getElementById('suggestionText').textContent = `${paletteName(c.group, c.i)} · ${c.speed}× flow`;
+    suggestion.hidden = false; modelStatus.textContent = 'Laya · suggestion ready on this computer';
+  } catch (err) { directorError.textContent = err.name === 'TimeoutError' ? 'Laya took too long. Try again shortly or choose a palette below.' : err instanceof TypeError ? 'Cannot reach local Laya. Retry shortly or choose a palette below.' : err.message; directorError.hidden = false; }
+  finally { suggestBtn.disabled = false; suggestBtn.innerHTML = 'Find my atmosphere <span>↗</span>'; }
+});
+document.getElementById('applySuggestion').addEventListener('click', () => {
+  if (!candidate) return;
+  sel = { group: candidate.group, i: candidate.i }; SPEED = candidate.speed;
+  store.set('sandscape.speed', String(SPEED)); applyPalette(); buildDrawer(); updateSpeedUI();
+  suggestion.hidden = true; candidate = null; toast('Atmosphere applied');
+});
+checkModel();
+
+/* Record the actual simulation; no generation service or paid model. */
+const recordBtn = document.getElementById('recordBtn');
+let recording = null;
+let recordingTimer;
+recordBtn.addEventListener('click', () => {
+  if (recording) { recording.stop(); return; }
+  const captureCanvas = use3D ? document.getElementById('sculpture') : cv;
+  if (!captureCanvas.captureStream || typeof MediaRecorder === 'undefined') { toast('Video recording is unavailable in this browser. Save a PNG instead.', 3500); return; }
+  const mime = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/mp4'].find(t => MediaRecorder.isTypeSupported(t));
+  if (!mime) { toast('No supported video format. Save a PNG instead.'); return; }
+  const stream = captureCanvas.captureStream(30);
+  const chunks = [];
+  try {
+    recording = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: 5000000 });
+    recording.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    recording.onstop = () => {
+      clearTimeout(recordingTimer); stream.getTracks().forEach(track => track.stop());
+      const blob = new Blob(chunks, { type: mime });
+      if (blob.size) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url;
+        a.download = `SandScape-${Date.now()}.${mime.includes('mp4') ? 'mp4' : 'webm'}`; a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 60000);
+        toast('Clip saved');
+      } else toast('Recording produced no video. Please try again.');
+      recording = null; recordBtn.innerHTML = '○ <span>Record clip</span>';
+    };
+    recording.onerror = () => { toast('Recording failed. Please try again.'); if (recording?.state !== 'inactive') recording.stop(); };
+    recording.start(); recordBtn.innerHTML = '■ <span>Stop recording</span>';
+    recordingTimer = setTimeout(() => { if (recording?.state === 'recording') recording.stop(); }, 30000);
+    toast('Recording the canvas · up to 30 seconds', 3000);
+  } catch {
+    stream.getTracks().forEach(track => track.stop()); recording = null;
+    toast('Could not start recording. Save a PNG instead.');
+  }
+});
+
 /* ---------- boot ---------- */
-window.sandscape = { sim, renderer, runSelfTests };   // debugging + smoke-test hook
+window.sandscape = { sim, renderer, runSelfTests, getVisualState: () => ({ use3D, orbitMode, ...sculpture?.stats() }), getSettings: () => ({ ...sel, speed: SPEED, paused, shape }) };   // debugging + smoke-test hook
 size();
 applyPalette();
 buildDrawer();
@@ -358,5 +505,38 @@ loop();
 
 /* PWA: register the offline service worker (best-effort, never blocks the app) */
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-  addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+  addEventListener('load', () => { navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(() => {}); });
 }
+
+/* Load 3D progressively: the original renderer stays usable on non-WebGL devices. */
+const sculptureWrap = document.getElementById('sculptureWrap');
+const visualStatus = document.getElementById('visualStatus');
+function show3D(enabled) {
+  use3D = enabled && !!sculpture?.ready;
+  sculptureWrap.hidden = !use3D; document.getElementById('stage').hidden = use3D;
+  document.getElementById('classicMode').setAttribute('aria-pressed', String(!use3D));
+  document.getElementById('classicMode').textContent = use3D ? '2D view' : '3D view';
+  document.getElementById('orbitMode').disabled = !use3D;
+  visualStatus.textContent = use3D ? 'SCULPTURE / LIVE SAND' : 'CLASSIC / LIVE SAND'; size();
+}
+document.getElementById('classicMode').addEventListener('click', () => show3D(!use3D));
+document.getElementById('orbitMode').addEventListener('click', e => { orbitMode=!orbitMode; e.currentTarget.setAttribute('aria-pressed',String(orbitMode)); e.currentTarget.textContent=orbitMode?'Tilt sand':'Orbit view'; toast(orbitMode?'Drag to look around. Sand gravity stays unchanged.':'Drag to tilt the sand picture.'); });
+document.querySelectorAll('[data-finish]').forEach(button => button.addEventListener('click', () => {
+  sculpture?.setFinish(button.dataset.finish);
+  document.querySelectorAll('[data-finish]').forEach(b=>b.setAttribute('aria-pressed',String(b===button)));
+}));
+(async () => {
+  try {
+    const { Sculpture } = await import('./sculpture.js');
+    const canvas = document.getElementById('sculpture');
+    const context = canvas.getContext('webgl2', { antialias: true, alpha: false, preserveDrawingBuffer: true });
+    if (!context) throw new Error('WebGL2 is unavailable');
+    sculpture = new Sculpture(canvas, N, context);
+    await sculpture.load(); sculpture.setShape(shape); sculpture.setPalette(resolvePalette(sel.group,sel.i)); show3D(true);
+  } catch (err) {
+    sculpture?.dispose(); sculpture=null;show3D(false);
+    visualStatus.textContent='CLASSIC VIEW / 3D UNAVAILABLE';
+    document.getElementById('classicMode').disabled=true;
+    console.warn('3D renderer unavailable:',err.message);
+  }
+})();
