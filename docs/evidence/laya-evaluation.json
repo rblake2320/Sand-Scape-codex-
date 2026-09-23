@@ -1,0 +1,235 @@
+{
+  "label_source": "Agent-authored descriptive acceptance cases; not human calibration or held-out benchmark",
+  "results": [
+    {
+      "prompt": "A warm orange desert sunset, slow and peaceful",
+      "expected": {
+        "palette": "sunset",
+        "flow": "slow"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 2,
+          "speed": 0.5
+        },
+        "choices": {
+          "palette": "sunset",
+          "flow": "slow"
+        },
+        "elapsed_ms": 500,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "Blue ocean water with gentle slow waves",
+      "expected": {
+        "palette": "ocean",
+        "flow": "slow"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 0,
+          "speed": 0.5
+        },
+        "choices": {
+          "palette": "ocean",
+          "flow": "slow"
+        },
+        "elapsed_ms": 495,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "An energetic fast tropical turquoise lagoon",
+      "expected": {
+        "palette": "turquoise",
+        "flow": "fast"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 1,
+          "speed": 2
+        },
+        "choices": {
+          "palette": "turquoise",
+          "flow": "fast"
+        },
+        "elapsed_ms": 485,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "White snow and silver ice at normal speed",
+      "expected": {
+        "palette": "arctic",
+        "flow": "normal"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 3,
+          "speed": 1
+        },
+        "choices": {
+          "palette": "arctic",
+          "flow": "normal"
+        },
+        "elapsed_ms": 445,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "Dark red volcano lava and ash flowing fast",
+      "expected": {
+        "palette": "volcanic",
+        "flow": "fast"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 4,
+          "speed": 2
+        },
+        "choices": {
+          "palette": "volcanic",
+          "flow": "fast"
+        },
+        "elapsed_ms": 450,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "A quiet blue sea, moving very slowly",
+      "expected": {
+        "palette": "ocean",
+        "flow": "slow"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 0,
+          "speed": 0.5
+        },
+        "choices": {
+          "palette": "ocean",
+          "flow": "slow"
+        },
+        "elapsed_ms": 531,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "A warm orange canyon with rapid flowing sand",
+      "expected": {
+        "palette": "sunset",
+        "flow": "fast"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 2,
+          "speed": 2
+        },
+        "choices": {
+          "palette": "sunset",
+          "flow": "fast"
+        },
+        "elapsed_ms": 489,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "A green forest with calm gentle motion",
+      "expected": {
+        "palette": "turquoise",
+        "flow": "slow"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 1,
+          "speed": 0.5
+        },
+        "choices": {
+          "palette": "turquoise",
+          "flow": "slow"
+        },
+        "elapsed_ms": 509,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "Monochrome white snow, peaceful and slow",
+      "expected": {
+        "palette": "arctic",
+        "flow": "slow"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 3,
+          "speed": 0.5
+        },
+        "choices": {
+          "palette": "arctic",
+          "flow": "slow"
+        },
+        "elapsed_ms": 488,
+        "review_required": true
+      },
+      "passed": true
+    },
+    {
+      "prompt": "Deep blue ocean, normal speed",
+      "expected": {
+        "palette": "ocean",
+        "flow": "normal"
+      },
+      "actual": {
+        "provider": "laya",
+        "model": "convaiinnovations/laya",
+        "settings": {
+          "group": "Exotic",
+          "i": 0,
+          "speed": 1
+        },
+        "choices": {
+          "palette": "ocean",
+          "flow": "normal"
+        },
+        "elapsed_ms": 501,
+        "review_required": true
+      },
+      "passed": true
+    }
+  ]
+}

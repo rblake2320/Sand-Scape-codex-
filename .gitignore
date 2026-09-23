@@ -1,4 +1,8 @@
 node_modules/
+.venv/
+__pycache__/
+artifacts/
+*.blend1
 .DS_Store
 *.log
 *.keystore

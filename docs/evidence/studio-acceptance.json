@@ -1,0 +1,141 @@
+[
+  {
+    "scenario": "empty prompt",
+    "status": "Worked",
+    "detail": {
+      "error": "Enter a scene description of 3\u2013240 characters"
+    }
+  },
+  {
+    "scenario": "malformed JSON",
+    "status": "Worked",
+    "detail": {
+      "error": "Invalid request or model result"
+    }
+  },
+  {
+    "scenario": "wrong payload type",
+    "status": "Worked",
+    "detail": {
+      "error": "Enter a scene description of 3\u2013240 characters"
+    }
+  },
+  {
+    "scenario": "oversized input",
+    "status": "Worked",
+    "detail": {
+      "error": "Request too large or empty"
+    }
+  },
+  {
+    "scenario": "foreign origin",
+    "status": "Worked",
+    "detail": {
+      "error": "Local requests only"
+    }
+  },
+  {
+    "scenario": "foreign host",
+    "status": "Worked",
+    "detail": {
+      "error": "Local requests only"
+    }
+  },
+  {
+    "scenario": "non-English script",
+    "status": "Worked",
+    "detail": {
+      "error": "This local checkpoint supports English descriptions; use the palette controls for other languages"
+    }
+  },
+  {
+    "scenario": "browser boot with real local model",
+    "status": "Worked",
+    "detail": {
+      "group": "Exotic",
+      "i": 0,
+      "speed": 1,
+      "paused": false,
+      "shape": "circle"
+    }
+  },
+  {
+    "scenario": "pause and typing shortcut isolation",
+    "status": "Worked",
+    "detail": {
+      "framePass": 123
+    }
+  },
+  {
+    "scenario": "real Laya suggestion reviewed and applied",
+    "status": "Worked",
+    "detail": {
+      "group": "Exotic",
+      "i": 2,
+      "speed": 0.5,
+      "paused": true,
+      "shape": "circle"
+    }
+  },
+  {
+    "scenario": "flip preserves sand",
+    "status": "Worked",
+    "detail": {
+      "grains": 70540
+    }
+  },
+  {
+    "scenario": "drawer shape controls and keyboard close",
+    "status": "Worked",
+    "detail": "Circle/square; Escape restores focus; hidden controls inert"
+  },
+  {
+    "scenario": "PNG export",
+    "status": "Worked",
+    "detail": {
+      "bytes": 1041304
+    }
+  },
+  {
+    "scenario": "recorded clip downloads and plays",
+    "status": "Worked",
+    "detail": {
+      "width": 550,
+      "height": 550,
+      "time": 0.493899,
+      "file": "SandScape-1790197421367.webm",
+      "bytes": 1484405
+    }
+  },
+  {
+    "scenario": "settings persist across reload",
+    "status": "Worked",
+    "detail": {
+      "group": "Exotic",
+      "i": 2,
+      "speed": 0.5,
+      "paused": false,
+      "shape": "circle"
+    }
+  },
+  {
+    "scenario": "model connection failure retains manual controls",
+    "status": "Worked",
+    "detail": "Failed to fetch"
+  },
+  {
+    "scenario": "offline PWA manual palette",
+    "status": "Worked",
+    "detail": "Booted offline and selected Arctic Glacier"
+  },
+  {
+    "scenario": "desktop JavaScript errors",
+    "status": "Worked",
+    "detail": []
+  },
+  {
+    "scenario": "mobile viewport and reduced motion",
+    "status": "Worked",
+    "detail": "390x844; no horizontal overflow; starts paused; controls usable"
+  }
+]

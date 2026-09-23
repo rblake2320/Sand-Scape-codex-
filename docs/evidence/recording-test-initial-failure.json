@@ -1,0 +1,1 @@
+{"scenario":"Recorded clip playback via test route","status":"Failed","observed":"Page.evaluate: Event","diagnosis":"Service worker intercepts synthetic URL before Playwright route; test changed to play actual downloaded bytes through blob URL"}

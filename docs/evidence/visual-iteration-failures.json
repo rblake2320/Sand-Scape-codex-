@@ -1,0 +1,5 @@
+[
+ {"scenario":"Initial Blender import","status":"Failed","observed":"Frame sat below the sand chamber","repair":"Removed duplicate center offset during Object3D.attach","retest":"Round and square frames align in captured browser images"},
+ {"scenario":"Air resistance at 1500 steps, 128 grid","status":"Failed","observed":"Both settings had already finished releasing: upper fraction 0.0024280911","repair":"Measure rate during the same cycle at 600 steps, retain separate full-cycle check","retest":"Open flow 23.59% retained; high resistance 44.70% retained"},
+ {"scenario":"Serving updated HTML","status":"Failed","observed":"UTF-8 decoder rejected a Windows-1252 ellipsis","repair":"Normalized text and used explicit UTF-8 in authoring scripts","retest":"HTTP 200, browser loaded 3D without errors"}
+]

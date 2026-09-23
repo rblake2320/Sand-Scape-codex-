@@ -1,0 +1,30 @@
+[
+  {
+    "step": 150,
+    "upper_fraction": 0.962511091393079,
+    "lower_fraction": 0.03748890860692103,
+    "mass": 22540,
+    "active_crossing_columns": 103
+  },
+  {
+    "step": 1500,
+    "upper_fraction": 0.2178793256433008,
+    "lower_fraction": 0.7821206743566992,
+    "mass": 22540,
+    "active_crossing_columns": 156
+  },
+  {
+    "step": 6000,
+    "upper_fraction": 0,
+    "lower_fraction": 1,
+    "mass": 22540,
+    "active_crossing_columns": 0
+  },
+  {
+    "step": 12000,
+    "upper_fraction": 0,
+    "lower_fraction": 1,
+    "mass": 22540,
+    "active_crossing_columns": 0
+  }
+]
